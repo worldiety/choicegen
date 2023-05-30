@@ -26,7 +26,11 @@ type MyChoiceType interface {
 }
 ```
 
-Then, it generates a `choicetypes.gen.go` files, which contains all the boilerplate.
+Then, it generates a `choicetypes.gen.go` files, which contains all the boilerplate, if you declare a standard go:generate directive like:
+
+```go
+//go:generate go run github.com/worldiety/choicegen@latest
+```
 
 ## Example
 
