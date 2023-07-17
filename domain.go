@@ -75,7 +75,14 @@ func determineChoiceTypeMembers(decls []ChoiceSubSetType) []ChoiceTypeMember {
 		}
 	}
 
-	return maps.Values(members)
+	values := maps.Values(members)
+
+	// Order members alphabetically for a stable generation output.
+	slices.SortFunc(values, func(a, b ChoiceTypeMember) bool {
+		return a.Name < b.Name
+	})
+
+	return values
 }
 
 func superSets(decls ChoiceTypeDeclaration, other []ChoiceTypeDeclaration) []ChoiceTypeDeclaration {
