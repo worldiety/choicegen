@@ -40,12 +40,6 @@ type Sum2 interface {
 
 }
 
-// OrderError is one of interface { MyError2 }
-
-func (_ OrderError) isMyError2() bool { return true }
-
-func (o OrderError) Error() string { return fmt.Sprintf("%T: %v", o, o) }
-
 // A is one of interface { Sum1 | Sum2 }
 
 func (_ A) isSum1() bool { return true }
@@ -60,23 +54,29 @@ func (_ B) isSum1() bool { return true }
 
 func (_ C) isSum1() bool { return true }
 
-// Inc is one of interface { MyGeneratedPageEvents }
-
-func (_ Inc) isMyGeneratedPageEvents() bool { return true }
-
 // Dec is one of interface { MyGeneratedPageEvents }
 
 func (_ Dec) isMyGeneratedPageEvents() bool { return true }
-
-// None is one of interface { MyGeneratedPageEvents }
-
-func (_ None) isMyGeneratedPageEvents() bool { return true }
 
 // DudeError is one of interface { MyError2 }
 
 func (_ DudeError) isMyError2() bool { return true }
 
 func (d DudeError) Error() string { return fmt.Sprintf("%T: %v", d, d) }
+
+// Inc is one of interface { MyGeneratedPageEvents }
+
+func (_ Inc) isMyGeneratedPageEvents() bool { return true }
+
+// None is one of interface { MyGeneratedPageEvents }
+
+func (_ None) isMyGeneratedPageEvents() bool { return true }
+
+// OrderError is one of interface { MyError2 }
+
+func (_ OrderError) isMyError2() bool { return true }
+
+func (o OrderError) Error() string { return fmt.Sprintf("%T: %v", o, o) }
 
 // MatchMyGeneratedPageEvents checks each type case and panics either if choiceType is nil or if an interface compatible
 // type has been passed but is not part of the sum type specification.
