@@ -25,13 +25,13 @@ func (c ChoiceGoTpl) HasFmt() bool {
 	}
 
 	return false*/
-	return true // matchFunc always has default panic
+	return len(c.ChoiceTypes) > 0 // matchFunc always has default panic
 }
 
 func formatSrc(s string) string {
 	buf, err := format.Source([]byte(s))
 	if err != nil {
-		panic(fmt.Sprintf("%s\n%v", buf, err))
+		panic(fmt.Sprintf("%s\n%v", s, err))
 	}
 
 	return string(buf)
@@ -64,6 +64,17 @@ func makeSrc(pkg Identifier, types []ChoiceSubSetType) string {
 				tmp += string(ident)
 				if i < len(idents)-1 {
 					tmp += " | "
+				}
+			}
+			return tmp
+		},
+
+		"joinParams": func(idents []Identifier) string {
+			tmp := ""
+			for i, ident := range idents {
+				tmp += string(ident)
+				if i < len(idents)-1 {
+					tmp += " , "
 				}
 			}
 			return tmp

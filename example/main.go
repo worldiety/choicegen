@@ -12,7 +12,32 @@ type Dec int
 type Inc int
 
 type DudeError string
+
+func (d DudeError) String() any {
+	return string(d)
+}
+
+func (d DudeError) MyCustomMethod() {
+
+}
+
+func (d DudeError) MyCustom2(a string, x, y int) (bool, error) {
+	return false, nil
+}
+
 type OrderError string
+
+func (o OrderError) String() any {
+	return string(o)
+}
+
+func (o OrderError) MyCustomMethod() {
+
+}
+
+func (d OrderError) MyCustom2(a string, x, y int) (bool, error) {
+	return false, nil
+}
 
 func main() {
 	var events MyGeneratedPageEvents

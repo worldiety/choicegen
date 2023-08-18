@@ -22,6 +22,9 @@ type MyError2 interface {
 
 	isMyError2() bool // marker method for MyError2
 
+	MyCustomMethod()
+
+	MyCustom2(string, int, int) (bool, error)
 }
 
 type Sum1 interface {
@@ -62,7 +65,7 @@ func (_ Dec) isMyGeneratedPageEvents() bool { return true }
 
 func (_ DudeError) isMyError2() bool { return true }
 
-func (d DudeError) Error() string { return fmt.Sprintf("%T: %v", d, d) }
+func (d DudeError) Error() string { return fmt.Sprintf("%T: %s", d, d.String()) }
 
 // Inc is one of interface { MyGeneratedPageEvents }
 
@@ -76,7 +79,7 @@ func (_ None) isMyGeneratedPageEvents() bool { return true }
 
 func (_ OrderError) isMyError2() bool { return true }
 
-func (o OrderError) Error() string { return fmt.Sprintf("%T: %v", o, o) }
+func (o OrderError) Error() string { return fmt.Sprintf("%T: %s", o, o.String()) }
 
 // MatchMyGeneratedPageEvents checks each type case and panics either if choiceType is nil or if an interface compatible
 // type has been passed but is not part of the sum type specification.

@@ -20,8 +20,15 @@ type Comment string
 type ChoiceTypeDeclaration struct {
 	Doc     Comment
 	Name    Identifier
+	Funcs   []FuncSpec
 	Choices []Identifier
 	Error   bool
+}
+
+type FuncSpec struct {
+	Name    Identifier
+	Params  []Identifier
+	Results []Identifier
 }
 
 // SuperSet is a set of local type identifiers which are equal or the super set of something else.

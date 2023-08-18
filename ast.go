@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -62,6 +63,22 @@ func parse(dir string) (pkgname string, _ []ChoiceTypeDeclaration) {
 
 						if iface, ok := spec.Type.(*ast.InterfaceType); ok {
 							for _, field := range iface.Methods.List {
+								if ftype, ok := field.Type.(*ast.FuncType); ok {
+									fname := field.Names[0].Name // you cannot express a fn without a name
+
+									fn := FuncSpec{
+										Name:   Identifier(fname),
+										Params: types(ftype.Params.List),
+									}
+
+									if ftype.Results != nil {
+										fn.Results = types(ftype.Results.List)
+									}
+
+									choiceType.Funcs = append(choiceType.Funcs, fn)
+									continue
+								}
+								//fmt.Printf("%s: %#v\n", choiceType.Name, field.Type)
 								idents := extractIdentifiers(field)
 								if len(idents) == 1 && idents[0] == "error" {
 									choiceType.Error = true
@@ -82,6 +99,25 @@ func parse(dir string) (pkgname string, _ []ChoiceTypeDeclaration) {
 	}
 
 	return pkgname, res
+}
+
+func types(fields []*ast.Field) []Identifier {
+	var res []Identifier
+	for _, field := range fields {
+		if ident, ok := field.Type.(*ast.Ident); ok {
+			if len(field.Names) > 0 {
+				for range field.Names {
+					res = append(res, Identifier(ident.Name))
+				}
+			} else {
+				res = append(res, Identifier(ident.Name))
+			}
+		} else {
+			fmt.Printf("fix me: unsupported ast import: %#v\n", field.Type)
+		}
+
+	}
+	return res
 }
 
 func extractIdentifiers(field *ast.Field) []Identifier {

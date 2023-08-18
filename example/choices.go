@@ -13,6 +13,8 @@ type MyGeneratedPageEvents interface {
 type MyError2 interface {
 	error
 	DudeError | OrderError
+	MyCustomMethod()
+	MyCustom2(a string, x, y int) (bool, error)
 }
 
 type Sum1 interface {
