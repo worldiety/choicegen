@@ -11,6 +11,17 @@ type C string
 type Dec int
 type Inc int
 
+type Krankheit int
+type Urlaub int
+
+type Elternzeit int
+type UnbezahlterUrlaub int
+
+type Anstellung int
+type Selbstständigkeit int
+type Freiwillig int
+type Pflicht int
+
 type DudeError string
 
 func (d DudeError) String() any {

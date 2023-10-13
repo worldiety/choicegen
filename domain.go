@@ -3,6 +3,7 @@ package main
 import (
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
+	"reflect"
 	"strings"
 )
 
@@ -18,11 +19,12 @@ type Comment string
 
 // A ChoiceTypeDeclaration aggregates all information about a new ChoiceType which must be generated.
 type ChoiceTypeDeclaration struct {
-	Doc     Comment
-	Name    Identifier
-	Funcs   []FuncSpec
-	Choices []Identifier
-	Error   bool
+	Doc                Comment
+	Name               Identifier
+	Funcs              []FuncSpec
+	Choices            []Identifier
+	Error              bool
+	EmbeddedInterfaces []Identifier
 }
 
 type FuncSpec struct {
@@ -75,10 +77,44 @@ func determineChoiceTypeMembers(decls []ChoiceSubSetType) []ChoiceTypeMember {
 			t := members[choice]
 			t.Name = choice
 			t.Error = decl.Error
+
+			// implements the higher interface i.e. Praktikum (Pflicht is part of  Praktikum)
 			if !slices.Contains(t.BelongsTo, decl.Name) {
 				t.BelongsTo = append(t.BelongsTo, decl.Name)
 			}
+
+			// implements the next higher interface(s) i.e. SonstigeArbeit (Pflicht is part of Praktikum is part of SonstigeArbeit)
+			for _, interf := range decl.EmbeddedInterfaces {
+				if !slices.Contains(t.BelongsTo, interf) {
+					t.BelongsTo = append(t.BelongsTo, interf)
+				}
+			}
+
+			// implements the highest interface, if interfaces are more nested i.e. Arbeit (Pflicht is part of Praktikum, is part of
+			// SonstigeArbeit is part of Arbeit
+			// TODO: ins Englische übersetzen und dann Pull Request stellen
+			for _, d := range decls {
+				for _, c := range d.Choices {
+					for _, i := range decl.EmbeddedInterfaces {
+						if c == i {
+							if !slices.Contains(t.BelongsTo, d.Name) {
+								t.BelongsTo = append(t.BelongsTo, d.Name)
+							}
+						}
+					}
+				}
+			}
+
 			members[choice] = t
+		}
+	}
+
+	for k, _ := range members {
+		for _, d := range decls {
+			if k == d.Name {
+				delete(members, k)
+
+			}
 		}
 	}
 
@@ -104,4 +140,8 @@ func superSets(decls ChoiceTypeDeclaration, other []ChoiceTypeDeclaration) []Cho
 	}
 
 	return superSets
+}
+
+func getType(v interface{}) reflect.Type {
+	return reflect.TypeOf(v)
 }

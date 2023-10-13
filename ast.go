@@ -10,6 +10,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 )
 
@@ -60,6 +61,8 @@ func parse(dir string) (pkgname string, _ []ChoiceTypeDeclaration) {
 							Name: Identifier(spec.Name.Name),
 							Doc:  Comment(comment),
 						}
+						ut := reflect.TypeOf(choiceType.Name)
+						fmt.Println(ut.Kind())
 
 						if iface, ok := spec.Type.(*ast.InterfaceType); ok {
 							for _, field := range iface.Methods.List {
@@ -78,18 +81,21 @@ func parse(dir string) (pkgname string, _ []ChoiceTypeDeclaration) {
 									choiceType.Funcs = append(choiceType.Funcs, fn)
 									continue
 								}
-								//fmt.Printf("%s: %#v\n", choiceType.Name, field.Type)
+								//fmt.Printf("%s: Type: %#v\n", choiceType.Name, field.Type)
 								idents := extractIdentifiers(field)
 								if len(idents) == 1 && idents[0] == "error" {
 									choiceType.Error = true
 								} else {
 									choiceType.Choices = idents
+
 								}
+
 							}
 							res = append(res, choiceType)
 
 						}
 					}
+
 				}
 			}
 
@@ -98,8 +104,29 @@ func parse(dir string) (pkgname string, _ []ChoiceTypeDeclaration) {
 
 	}
 
+	// ergänzt die ChoiceTypes die eingbettet sind um das Interface, in die sie eingebettet wurden. Dadurch wird verhindert,
+	// dass sie weitere Methoden benötigen, um das Interface zu erfüllen.
+	for _, re := range res {
+		for _, choice := range re.Choices { // choices sind die Auswahlmöglichkeiten in den Interfaces
+			choiceIsOtherChoice := false
+			for i, declaration := range res {
+				if declaration.Name == choice {
+					choiceIsOtherChoice = true
+				}
+				if choiceIsOtherChoice {
+					declaration.EmbeddedInterfaces = append(declaration.EmbeddedInterfaces, re.Name)
+					choiceIsOtherChoice = false
+					res[i] = declaration
+
+				}
+			}
+		}
+	}
+
 	return pkgname, res
 }
+
+//TODO: Mit mehreren verschachtelten Interfaces testen. func (_ Krankheit) isFehlzeit() bool {return true} hinterlegen lassen
 
 func types(fields []*ast.Field) []Identifier {
 	var res []Identifier
@@ -141,4 +168,8 @@ func (v VisitorFunc) Visit(node ast.Node) (w ast.Visitor) {
 	}
 
 	return nil
+}
+
+func eliminateChoiceTypeInterfaces() {
+
 }

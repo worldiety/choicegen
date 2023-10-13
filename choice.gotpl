@@ -16,16 +16,24 @@ package {{.Package}}
             is{{.}}() bool // marker method for {{.}}
         {{end}}
 
+         {{range .EmbeddedInterfaces}}
+               {{.}}
+         {{end}}
+
         {{range .Funcs}}
                     {{.Name}}({{joinParams .Params}}) ({{joinParams .Results}})
         {{end}}
+
+
     }
 {{end}}
 
 {{range $member := .MemberTypes}}
     // {{$member.Name}} is one of interface { {{joinIdents $member.BelongsTo}} }
     {{range $member.BelongsTo}}
-        func (_ {{$member.Name}}) is{{.}}() bool { return true }
+
+       func (_ {{$member.Name}}) is{{.}}() bool { return true }
+
     {{end}}
 
     {{if $member.Error}}
