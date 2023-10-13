@@ -10,7 +10,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"reflect"
 	"strings"
 )
 
@@ -61,8 +60,6 @@ func parse(dir string) (pkgname string, _ []ChoiceTypeDeclaration) {
 							Name: Identifier(spec.Name.Name),
 							Doc:  Comment(comment),
 						}
-						ut := reflect.TypeOf(choiceType.Name)
-						fmt.Println(ut.Kind())
 
 						if iface, ok := spec.Type.(*ast.InterfaceType); ok {
 							for _, field := range iface.Methods.List {
@@ -104,10 +101,8 @@ func parse(dir string) (pkgname string, _ []ChoiceTypeDeclaration) {
 
 	}
 
-	// ergänzt die ChoiceTypes die eingbettet sind um das Interface, in die sie eingebettet wurden. Dadurch wird verhindert,
-	// dass sie weitere Methoden benötigen, um das Interface zu erfüllen.
 	for _, re := range res {
-		for _, choice := range re.Choices { // choices sind die Auswahlmöglichkeiten in den Interfaces
+		for _, choice := range re.Choices {
 			choiceIsOtherChoice := false
 			for i, declaration := range res {
 				if declaration.Name == choice {
@@ -125,8 +120,6 @@ func parse(dir string) (pkgname string, _ []ChoiceTypeDeclaration) {
 
 	return pkgname, res
 }
-
-//TODO: Mit mehreren verschachtelten Interfaces testen. func (_ Krankheit) isFehlzeit() bool {return true} hinterlegen lassen
 
 func types(fields []*ast.Field) []Identifier {
 	var res []Identifier
@@ -168,8 +161,4 @@ func (v VisitorFunc) Visit(node ast.Node) (w ast.Visitor) {
 	}
 
 	return nil
-}
-
-func eliminateChoiceTypeInterfaces() {
-
 }

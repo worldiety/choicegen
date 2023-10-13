@@ -92,7 +92,6 @@ func determineChoiceTypeMembers(decls []ChoiceSubSetType) []ChoiceTypeMember {
 
 			// implements the highest interface, if interfaces are more nested i.e. Arbeit (Pflicht is part of Praktikum, is part of
 			// SonstigeArbeit is part of Arbeit
-			// TODO: ins Englische übersetzen und dann Pull Request stellen
 			for _, d := range decls {
 				for _, c := range d.Choices {
 					for _, i := range decl.EmbeddedInterfaces {
