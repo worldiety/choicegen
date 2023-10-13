@@ -6,10 +6,6 @@ import (
 	"fmt"
 )
 
-// MyGeneratedPageEvents shows the mighty generator.
-// In your ears.
-//
-// Cool.
 type MyGeneratedPageEvents interface {
 	// Inc | Dec | None
 
@@ -43,11 +39,110 @@ type Sum2 interface {
 
 }
 
+type Ausfall interface {
+	// UnbezahlteFehlzeit
+
+	isAusfall() bool // marker method for Ausfall
+
+	isFehlzeit() bool // marker method for Fehlzeit
+
+}
+
+type ÜberFehlzeit interface {
+	// Fehlzeit
+
+	isÜberFehlzeit() bool // marker method for ÜberFehlzeit
+
+}
+
+type Fehlzeit interface {
+	// BezahlteFehlzeit | UnbezahlteFehlzeit
+
+	isFehlzeit() bool // marker method for Fehlzeit
+
+	ÜberFehlzeit
+}
+
+type BezahlteFehlzeit interface {
+	// Krankheit
+
+	isBezahlteFehlzeit() bool // marker method for BezahlteFehlzeit
+
+	Fehlzeit
+}
+
+type UnbezahlteFehlzeit interface {
+	// Elternzeit
+
+	isUnbezahlteFehlzeit() bool // marker method for UnbezahlteFehlzeit
+
+	Ausfall
+
+	Fehlzeit
+}
+
+type Arbeit interface {
+	// BezahlteArbeit | UnbezahlteArbeit | SonstigeArbeit
+
+	isArbeit() bool // marker method for Arbeit
+
+}
+
+type BezahlteArbeit interface {
+	// Anstellung
+
+	isBezahlteArbeit() bool // marker method for BezahlteArbeit
+
+	Arbeit
+}
+
+type UnbezahlteArbeit interface {
+	// Selbstständigkeit
+
+	isUnbezahlteArbeit() bool // marker method for UnbezahlteArbeit
+
+	Arbeit
+}
+
+type SonstigeArbeit interface {
+	// Praktikum | Hospitation
+
+	isSonstigeArbeit() bool // marker method for SonstigeArbeit
+
+	Arbeit
+}
+
+type Praktikum interface {
+	// Pflicht | Freiwillig
+
+	isPraktikum() bool // marker method for Praktikum
+
+	isHospitation() bool // marker method for Hospitation
+
+	SonstigeArbeit
+}
+
+type Hospitation interface {
+	// Pflicht | Freiwillig
+
+	isPraktikum() bool // marker method for Praktikum
+
+	isHospitation() bool // marker method for Hospitation
+
+	SonstigeArbeit
+}
+
 // A is one of interface { Sum1 | Sum2 }
 
 func (_ A) isSum1() bool { return true }
 
 func (_ A) isSum2() bool { return true }
+
+// Anstellung is one of interface { BezahlteArbeit | Arbeit }
+
+func (_ Anstellung) isBezahlteArbeit() bool { return true }
+
+func (_ Anstellung) isArbeit() bool { return true }
 
 // B is one of interface { Sum1 }
 
@@ -67,9 +162,37 @@ func (_ DudeError) isMyError2() bool { return true }
 
 func (d DudeError) Error() string { return fmt.Sprintf("%T: %s", d, d.String()) }
 
+// Elternzeit is one of interface { UnbezahlteFehlzeit | Ausfall | Fehlzeit | ÜberFehlzeit }
+
+func (_ Elternzeit) isUnbezahlteFehlzeit() bool { return true }
+
+func (_ Elternzeit) isAusfall() bool { return true }
+
+func (_ Elternzeit) isFehlzeit() bool { return true }
+
+func (_ Elternzeit) isÜberFehlzeit() bool { return true }
+
+// Freiwillig is one of interface { Praktikum | SonstigeArbeit | Arbeit | Hospitation }
+
+func (_ Freiwillig) isPraktikum() bool { return true }
+
+func (_ Freiwillig) isSonstigeArbeit() bool { return true }
+
+func (_ Freiwillig) isArbeit() bool { return true }
+
+func (_ Freiwillig) isHospitation() bool { return true }
+
 // Inc is one of interface { MyGeneratedPageEvents }
 
 func (_ Inc) isMyGeneratedPageEvents() bool { return true }
+
+// Krankheit is one of interface { BezahlteFehlzeit | Fehlzeit | ÜberFehlzeit }
+
+func (_ Krankheit) isBezahlteFehlzeit() bool { return true }
+
+func (_ Krankheit) isFehlzeit() bool { return true }
+
+func (_ Krankheit) isÜberFehlzeit() bool { return true }
 
 // None is one of interface { MyGeneratedPageEvents }
 
@@ -80,6 +203,22 @@ func (_ None) isMyGeneratedPageEvents() bool { return true }
 func (_ OrderError) isMyError2() bool { return true }
 
 func (o OrderError) Error() string { return fmt.Sprintf("%T: %s", o, o.String()) }
+
+// Pflicht is one of interface { Praktikum | SonstigeArbeit | Arbeit | Hospitation }
+
+func (_ Pflicht) isPraktikum() bool { return true }
+
+func (_ Pflicht) isSonstigeArbeit() bool { return true }
+
+func (_ Pflicht) isArbeit() bool { return true }
+
+func (_ Pflicht) isHospitation() bool { return true }
+
+// Selbstständigkeit is one of interface { UnbezahlteArbeit | Arbeit }
+
+func (_ Selbstständigkeit) isUnbezahlteArbeit() bool { return true }
+
+func (_ Selbstständigkeit) isArbeit() bool { return true }
 
 // MatchMyGeneratedPageEvents checks each type case and panics either if choiceType is nil or if an interface compatible
 // type has been passed but is not part of the sum type specification.
@@ -137,4 +276,148 @@ func MatchSum2[R any](choiceType Sum2, matchA func(A) R) R {
 	}
 
 	panic(fmt.Sprintf("%T is not part of the choice type Sum2", choiceType))
+}
+
+// MatchAusfall checks each type case and panics either if choiceType is nil or if an interface compatible
+// type has been passed but is not part of the sum type specification.
+// Each case must be handled and evaluate properly, so nil functions will panic.
+func MatchAusfall[R any](choiceType Ausfall, matchUnbezahlteFehlzeit func(UnbezahlteFehlzeit) R) R {
+	switch t := choiceType.(type) {
+	case UnbezahlteFehlzeit:
+		return matchUnbezahlteFehlzeit(t)
+	}
+
+	panic(fmt.Sprintf("%T is not part of the choice type Ausfall", choiceType))
+}
+
+// MatchÜberFehlzeit checks each type case and panics either if choiceType is nil or if an interface compatible
+// type has been passed but is not part of the sum type specification.
+// Each case must be handled and evaluate properly, so nil functions will panic.
+func MatchÜberFehlzeit[R any](choiceType ÜberFehlzeit, matchFehlzeit func(Fehlzeit) R) R {
+	switch t := choiceType.(type) {
+	case Fehlzeit:
+		return matchFehlzeit(t)
+	}
+
+	panic(fmt.Sprintf("%T is not part of the choice type ÜberFehlzeit", choiceType))
+}
+
+// MatchFehlzeit checks each type case and panics either if choiceType is nil or if an interface compatible
+// type has been passed but is not part of the sum type specification.
+// Each case must be handled and evaluate properly, so nil functions will panic.
+func MatchFehlzeit[R any](choiceType Fehlzeit, matchBezahlteFehlzeit func(BezahlteFehlzeit) R, matchUnbezahlteFehlzeit func(UnbezahlteFehlzeit) R) R {
+	switch t := choiceType.(type) {
+	case BezahlteFehlzeit:
+		return matchBezahlteFehlzeit(t)
+	case UnbezahlteFehlzeit:
+		return matchUnbezahlteFehlzeit(t)
+	}
+
+	panic(fmt.Sprintf("%T is not part of the choice type Fehlzeit", choiceType))
+}
+
+// MatchBezahlteFehlzeit checks each type case and panics either if choiceType is nil or if an interface compatible
+// type has been passed but is not part of the sum type specification.
+// Each case must be handled and evaluate properly, so nil functions will panic.
+func MatchBezahlteFehlzeit[R any](choiceType BezahlteFehlzeit, matchKrankheit func(Krankheit) R) R {
+	switch t := choiceType.(type) {
+	case Krankheit:
+		return matchKrankheit(t)
+	}
+
+	panic(fmt.Sprintf("%T is not part of the choice type BezahlteFehlzeit", choiceType))
+}
+
+// MatchUnbezahlteFehlzeit checks each type case and panics either if choiceType is nil or if an interface compatible
+// type has been passed but is not part of the sum type specification.
+// Each case must be handled and evaluate properly, so nil functions will panic.
+func MatchUnbezahlteFehlzeit[R any](choiceType UnbezahlteFehlzeit, matchElternzeit func(Elternzeit) R) R {
+	switch t := choiceType.(type) {
+	case Elternzeit:
+		return matchElternzeit(t)
+	}
+
+	panic(fmt.Sprintf("%T is not part of the choice type UnbezahlteFehlzeit", choiceType))
+}
+
+// MatchArbeit checks each type case and panics either if choiceType is nil or if an interface compatible
+// type has been passed but is not part of the sum type specification.
+// Each case must be handled and evaluate properly, so nil functions will panic.
+func MatchArbeit[R any](choiceType Arbeit, matchBezahlteArbeit func(BezahlteArbeit) R, matchUnbezahlteArbeit func(UnbezahlteArbeit) R, matchSonstigeArbeit func(SonstigeArbeit) R) R {
+	switch t := choiceType.(type) {
+	case BezahlteArbeit:
+		return matchBezahlteArbeit(t)
+	case UnbezahlteArbeit:
+		return matchUnbezahlteArbeit(t)
+	case SonstigeArbeit:
+		return matchSonstigeArbeit(t)
+	}
+
+	panic(fmt.Sprintf("%T is not part of the choice type Arbeit", choiceType))
+}
+
+// MatchBezahlteArbeit checks each type case and panics either if choiceType is nil or if an interface compatible
+// type has been passed but is not part of the sum type specification.
+// Each case must be handled and evaluate properly, so nil functions will panic.
+func MatchBezahlteArbeit[R any](choiceType BezahlteArbeit, matchAnstellung func(Anstellung) R) R {
+	switch t := choiceType.(type) {
+	case Anstellung:
+		return matchAnstellung(t)
+	}
+
+	panic(fmt.Sprintf("%T is not part of the choice type BezahlteArbeit", choiceType))
+}
+
+// MatchUnbezahlteArbeit checks each type case and panics either if choiceType is nil or if an interface compatible
+// type has been passed but is not part of the sum type specification.
+// Each case must be handled and evaluate properly, so nil functions will panic.
+func MatchUnbezahlteArbeit[R any](choiceType UnbezahlteArbeit, matchSelbstständigkeit func(Selbstständigkeit) R) R {
+	switch t := choiceType.(type) {
+	case Selbstständigkeit:
+		return matchSelbstständigkeit(t)
+	}
+
+	panic(fmt.Sprintf("%T is not part of the choice type UnbezahlteArbeit", choiceType))
+}
+
+// MatchSonstigeArbeit checks each type case and panics either if choiceType is nil or if an interface compatible
+// type has been passed but is not part of the sum type specification.
+// Each case must be handled and evaluate properly, so nil functions will panic.
+func MatchSonstigeArbeit[R any](choiceType SonstigeArbeit, matchPraktikum func(Praktikum) R, matchHospitation func(Hospitation) R) R {
+	switch t := choiceType.(type) {
+	case Praktikum:
+		return matchPraktikum(t)
+	case Hospitation:
+		return matchHospitation(t)
+	}
+
+	panic(fmt.Sprintf("%T is not part of the choice type SonstigeArbeit", choiceType))
+}
+
+// MatchPraktikum checks each type case and panics either if choiceType is nil or if an interface compatible
+// type has been passed but is not part of the sum type specification.
+// Each case must be handled and evaluate properly, so nil functions will panic.
+func MatchPraktikum[R any](choiceType Praktikum, matchPflicht func(Pflicht) R, matchFreiwillig func(Freiwillig) R) R {
+	switch t := choiceType.(type) {
+	case Pflicht:
+		return matchPflicht(t)
+	case Freiwillig:
+		return matchFreiwillig(t)
+	}
+
+	panic(fmt.Sprintf("%T is not part of the choice type Praktikum", choiceType))
+}
+
+// MatchHospitation checks each type case and panics either if choiceType is nil or if an interface compatible
+// type has been passed but is not part of the sum type specification.
+// Each case must be handled and evaluate properly, so nil functions will panic.
+func MatchHospitation[R any](choiceType Hospitation, matchPflicht func(Pflicht) R, matchFreiwillig func(Freiwillig) R) R {
+	switch t := choiceType.(type) {
+	case Pflicht:
+		return matchPflicht(t)
+	case Freiwillig:
+		return matchFreiwillig(t)
+	}
+
+	panic(fmt.Sprintf("%T is not part of the choice type Hospitation", choiceType))
 }
