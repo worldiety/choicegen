@@ -78,24 +78,44 @@ func parse(dir string) (pkgname string, _ []ChoiceTypeDeclaration) {
 									choiceType.Funcs = append(choiceType.Funcs, fn)
 									continue
 								}
-								//fmt.Printf("%s: %#v\n", choiceType.Name, field.Type)
+								//fmt.Printf("%s: Type: %#v\n", choiceType.Name, field.Type)
 								idents := extractIdentifiers(field)
 								if len(idents) == 1 && idents[0] == "error" {
 									choiceType.Error = true
 								} else {
 									choiceType.Choices = idents
+
 								}
+
 							}
 							res = append(res, choiceType)
 
 						}
 					}
+
 				}
 			}
 
 			return true
 		}), p)
 
+	}
+
+	for _, re := range res {
+		for _, choice := range re.Choices {
+			choiceIsOtherChoice := false
+			for i, declaration := range res {
+				if declaration.Name == choice {
+					choiceIsOtherChoice = true
+				}
+				if choiceIsOtherChoice {
+					declaration.EmbeddedInterfaces = append(declaration.EmbeddedInterfaces, re.Name)
+					choiceIsOtherChoice = false
+					res[i] = declaration
+
+				}
+			}
+		}
 	}
 
 	return pkgname, res
